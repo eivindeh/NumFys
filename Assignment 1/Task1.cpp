@@ -3,8 +3,9 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <fstream>
 #include "functions.h"
-
+#define MAXPNT  10000
 using namespace std;
 
 double k_bT     =  26;
@@ -15,7 +16,7 @@ double tau      =  0;
 double dt       =  0.01;
 double r        =  12;
 double eta      =  1;
-int N           =  tau/dt;
+const int N           =  tau/dt;
 
 double gamma_i  =  6*3.1415*r*eta;
 double D_hat    =  k_bT*delta_U;
@@ -87,14 +88,23 @@ double step(double x_n,double t_n)
 }
 
 
-
+void print2file(double x[][MAXPNT])
+{
+    ofstream myFile;
+    myFile.open("simOut.txt");
+    for (int i = 0; i < N; i++)
+    {
+	cout << x[0][i] << "hei" << x[1][i] << x[2][i] << x[3][i] << "\n";
+    }
+    myFile.close();
+}
 
 
 
 int main()
 
 {
-    double x[3][N];
+    double x[3][MAXPNT];
     x[0][0]=0;
     x[1][0]=0;
     x[2][0]=0;
@@ -105,6 +115,8 @@ int main()
     	U_r(x[0][i],x[1][i],&x[2][i+1]);
     }
     cout << "hello world\n";
+
+    print2file(x);
 
     return 0;
 }
