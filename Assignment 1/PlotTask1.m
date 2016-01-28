@@ -2,6 +2,8 @@ k_bT    = 26;
 delta_U = 260;
 alpha   = 0.2;
 L       = 20;
+r       = 12;
+eta     = 1;
 
 x   = linspace(-L+alpha*L,alpha*L,1000);
 U_r = getU(x,alpha,L,delta_U);
@@ -16,7 +18,7 @@ U       = rawData{1,3}*delta_U;
 figure(1);
 
 plot(time,pos);
-
+hold on;
 [f,g]=hist(pos,50);
 
 figure(2)

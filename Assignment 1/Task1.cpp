@@ -6,7 +6,7 @@
 #include <fstream>
 #include <stdio.h>
 #include "functions.h"
-#define MAXPNT  10000
+#define MAXPNT  100000
 using namespace std;
 
 double k_bT     =  26;
@@ -14,10 +14,10 @@ double delta_U  =  260;
 double alpha    =  0.2;
 double L        =  20;
 double tau      =  0;
-double dt       =  0.0001;
+double dt       =  0.000000001;
 double r        =  12;
 double eta      =  1;
-long int N      =  5000;
+long int N      =  10000;
 
 double gamma_i  =  6*3.1415*r*eta;
 double D_hat    =  k_bT/delta_U;
@@ -25,7 +25,7 @@ double omega    =  delta_U/(gamma_i*L*L);
 
 void U_r(double x_hat,double t_hat,double * U)
 
-{   double x_mod=x_hat-floor(x_hat);
+{   double x_mod=abs(x_hat-floor(x_hat));
     if (x_mod > 0 && x_mod < alpha)
         *U = x_mod*k_bT/(alpha*D_hat);
     else
@@ -39,15 +39,15 @@ void U_r(double x_hat,double t_hat,double * U)
 void F_r(double x_hat,double t_hat,double * F)
 
 {   
-    double x_mod=x_hat-floor(x_hat);
+    double x_mod=abs(x_hat-floor(x_hat));
 
     if (x_mod >= 0 && x_mod < alpha)
         *F = -k_bT/(alpha*D_hat);
-    else
+    else if (x_mod >= alpha && x_mod < 1)
         *F = 1/(1-alpha)*k_bT/D_hat;
     
-    if (t_hat > 0 && t_hat < 3*tau*omega/4)
-        *F = 0;
+   // if (t_hat > 0 && t_hat < 3*tau*omega/4)
+   //     *F = 0;
       
 }
 
@@ -55,7 +55,6 @@ double getRandom(double mu, double sigma)
 {
 	const double epsilon = std::numeric_limits<double>::min();
 	const double two_pi = 2.0*3.14159265358979323846;
-
 	static double z0, z1;
 	static bool generate;
 	generate = !generate;
@@ -105,6 +104,8 @@ void print2file(double x[][MAXPNT])
 int main()
 
 {
+	srand (time(NULL)); 
+	
     double x[3][MAXPNT];
     x[0][0]=0;
     x[1][0]=0;
@@ -113,7 +114,8 @@ int main()
     for (int i = 0; i < N; i++){
     	x[1][i+1] = x[1][i] + dt;
     	x[0][i+1] = step(x[0][i],x[1][i]);
-    	U_r(x[0][i],x[1][i],&x[2][i+1]);
+    	F_r(x[0][i],x[1][i],&x[2][i]);
+    	//x[2][i+1]=getRandom(0,1);
     }
 
     print2file(x);
