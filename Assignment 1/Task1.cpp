@@ -14,10 +14,10 @@ double delta_U  =  260;
 double alpha    =  0.2;
 double L        =  20;
 double tau      =  0;
-double dt       =  0.000000001;
+double dt       =  0.0001;
 double r        =  12;
 double eta      =  1;
-long int N      =  10000;
+long int N      =  100000;
 
 double gamma_i  =  6*3.1415*r*eta;
 double D_hat    =  k_bT/delta_U;
@@ -42,9 +42,9 @@ void F_r(double x_hat,double t_hat,double * F)
     double x_mod=abs(x_hat-floor(x_hat));
 
     if (x_mod >= 0 && x_mod < alpha)
-        *F = -k_bT/(alpha*D_hat);
+        *F = -1/(alpha);
     else if (x_mod >= alpha && x_mod < 1)
-        *F = 1/(1-alpha)*k_bT/D_hat;
+        *F = 1/(1-alpha);
     
    // if (t_hat > 0 && t_hat < 3*tau*omega/4)
    //     *F = 0;

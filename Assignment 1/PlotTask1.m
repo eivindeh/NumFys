@@ -1,3 +1,4 @@
+close all;
 k_bT    = 26;
 delta_U = 260;
 alpha   = 0.2;
