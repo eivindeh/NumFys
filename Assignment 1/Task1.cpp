@@ -6,23 +6,23 @@
 #include <fstream>
 #include <stdio.h>
 #include "functions.h"
-#define MAXPNT  100000
+//#define MAXPNT  1000000
 using namespace std;
 
 double k_bT     =  26;
-double delta_U  =  260;
+double delta_U  =  80000;
 double alpha    =  0.2;
 double L        =  20;
-double tau      =  0;
-double dt       =  0.0001;
+double tau      =  400;
+double dt       =  0.005;
 double r        =  12;
 double eta      =  1;
-long int N      =  100000;
-
+const long int N      =  400000;
+const int M = 100;
 double gamma_i  =  6*3.1415*r*eta;
 double D_hat    =  k_bT/delta_U;
 double omega    =  delta_U/(gamma_i*L*L);
-
+double x[3][N][M];
 void U_r(double x_hat,double t_hat,double * U)
 
 {   double x_mod=abs(x_hat-floor(x_hat));
@@ -46,9 +46,10 @@ void F_r(double x_hat,double t_hat,double * F)
     else if (x_mod >= alpha && x_mod < 1)
         *F = 1/(1-alpha);
     
-   // if (t_hat > 0 && t_hat < 3*tau*omega/4)
-   //     *F = 0;
-      
+    double t_mod = abs(t_hat-floor(t_hat/(tau))*tau);
+
+    if (t_mod >= 0 && t_mod < 3*tau/4)
+        *F = 0;
 }
 
 double getRandom(double mu, double sigma)
@@ -88,38 +89,59 @@ double step(double x_n,double t_n)
 }
 
 
-void print2file(double x[][MAXPNT])
+void print2file(double x[][N][M])
 {
     FILE *fptr;
     fptr = fopen("simOut.txt","w");
     for (int i = 0; i < N; i++)
     {   
-        fprintf(fptr,"%15.6f%15.6f%15.6f\n",x[0][i],x[1][i],x[2][i]);
+        fprintf(fptr,"%15.6f%15.6f%15.6f\n",x[0][i][0],x[1][i][0],x[2][i][0]);
     }
     fclose(fptr);
 }
 
-
+double getAvgVel(double x[][N][M])
+{
+    double avg;
+    for( int j = 0; j<M ; j++){
+        avg = avg + x[0][N-1][j];
+    }
+    return avg/x[1][N-1][0]/M;
+}
 
 int main()
 
 {
-	srand (time(NULL)); 
-	
-    double x[3][MAXPNT];
-    x[0][0]=0;
-    x[1][0]=0;
-    x[2][0]=0;
-
-    for (int i = 0; i < N; i++){
-    	x[1][i+1] = x[1][i] + dt;
-    	x[0][i+1] = step(x[0][i],x[1][i]);
-    	F_r(x[0][i],x[1][i],&x[2][i]);
-    	//x[2][i+1]=getRandom(0,1);
+//Check timestep
+    cout<<omega<<endl;
+    double LHS = dt/alpha+4*sqrt(2*D_hat*dt);
+    if (LHS>alpha/100){
+        cout<<"Error: Too large timestep"<<endl;
     }
+    //cout<<LHS;
+    srand (time(NULL));
+    FILE *fptr;
+    fptr = fopen("velData.txt","w");
+for (tau=10 ; tau < 400; tau=tau+10){
+    for (int j = 0; j < M; j++){
+        x[0][0][j]=0;
+        x[1][0][j]=0;
+        x[2][0][j]=0;
 
-    print2file(x);
-    cout<<1/gamma_i*delta_U/(L*alpha)*dt+4*sqrt(2*k_bT*dt/gamma_i)<< endl<<alpha*L;
+        for (int i = 0; i < N; i++){
+    	    x[1][i+1][j] = x[1][i][j] + dt;
+    	    x[0][i+1][j] = step(x[0][i][j],x[1][i][j]);
+    	    //F_r(x[0][i][j],x[1][i][j],&x[2][i][j]);
+    	    //x[2][i+1]=getRandom(0,1);
+        }
+        //print2file(x);
+        //cout<<1/gamma_i*delta_U/(L*alpha)*dt+4*sqrt(2*k_bT*dt/gamma_i)<< endl<<alpha*L;
+    }
+    double avg = getAvgVel(x);
+    cout << avg << endl;
+    fprintf(fptr,"%15.6f\n",avg);
+}
+fclose(fptr);
     return 0;
 }
 
