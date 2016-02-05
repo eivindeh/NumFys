@@ -17,14 +17,15 @@ x   = linspace(-L+alpha*L,alpha*L,1000);
 U_r = getU(x,alpha,L,delta_U);
 
 r   = exp(-U_r./(k_bT))./(k_bT*(1-exp(-delta_U/(k_bT))));
+% 
+% fileID  = fopen('simOut.txt');
+% rawData = textscan(fileID,'%f %f %f');
+% time    = rawData{1,2};
+% pos     = rawData{1,1}*L;
+% U       = rawData{1,3}*delta_U;
+% figure(1);
 
-fileID  = fopen('simOut.txt');
-rawData = textscan(fileID,'%f %f %f');
-time    = rawData{1,2};
-pos     = rawData{1,1}*L;
-U       = rawData{1,3}*delta_U;
-figure(1);
-fileID2 = fopen('velData.txt');
+fileID2 = fopen('veldata2.txt');
 rawData = textscan(fileID2,'%f');
 vel = rawData{1,1};
 tau = linspace(50,390,(400-50)/10);

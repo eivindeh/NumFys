@@ -15,17 +15,18 @@ double delta_U   =  80000;
 double alpha     =  0.2;
 double L         =  20;
 double tau       =  400;
-double dt        =  0.005;
+double dt        =  0.001;
 double r         =  12;
 double eta       =  1;
-const long int N =  400000;
-const int M      =  100;
+const long int N =  800000;
+const int M      =  200;
 
 double gamma_i   =  6*3.1415*r*eta;
 double D_hat     =  k_bT/delta_U;
 double omega     =  delta_U/(gamma_i*L*L);
 
-double x[3][N][M];
+double x_prev[3][M];
+double x_next[3][M];
 double chi;
 
 
@@ -88,13 +89,13 @@ void print2file(double x[][N][M])
     fclose(fptr);
 }
 
-double getAvgVel(double x[][N][M])
+double getAvgVel(double x[][M])
 {
     double avg;
     for( int j = 0; j<M ; j++){
-        avg = avg + x[0][N-1][j];
+        avg = avg + x[0][j];
     }
-    return avg/x[1][N-1][0]/M;
+    return avg/x[1][0]/M;
 }
 
 
@@ -104,34 +105,34 @@ int main()
 //Check timestep
     cout<<omega<<endl;
     double LHS = dt/alpha+4*sqrt(2*D_hat*dt);
-    if (LHS>alpha/100){
+    if (LHS>alpha/10){
         cout<<"Error: Too large timestep"<<endl;
     }
     //cout<<LHS;
     //srand (time(NULL));
-    cout<<"beforebefore"<<endl;
     FILE *fptr;
     fptr = fopen("velData.txt","w");
     std::default_random_engine generator;
     std::normal_distribution<double> distribution(0,1);
-for (tau=10 ; tau < 400; tau=tau+10){
-	cout<<"after"<<endl;
+for (tau=10 ; tau < 300; tau=tau+2){
     for (int j = 0; j < M; j++){
-        x[0][0][j]=0;
-        x[1][0][j]=0;
-        x[2][0][j]=0;
+        x_prev[0][j]=0;
+        x_prev[1][j]=0;
+        x_prev[2][j]=0;
 
         for (int i = 0; i < N; i++){
 			chi= distribution(generator);
-    	    x[1][i+1][j] = x[1][i][j] + dt;
-    	    x[0][i+1][j] = step(x[0][i][j],x[1][i][j],chi);
+    	    x_next[1][j] = x_prev[1][j] + dt;
+    	    x_next[0][j] = step(x_prev[0][j],x_prev[1][j],chi);
+    	    x_prev[0][j] = x_next[0][j];
+    	    x_prev[1][j] = x_next[1][j];
     	    //F_r(x[0][i][j],x[1][i][j],&x[2][i][j]);
     	    //x[2][i+1]=getRandom(0,1);
         }
         //print2file(x);
         //cout<<1/gamma_i*delta_U/(L*alpha)*dt+4*sqrt(2*k_bT*dt/gamma_i)<< endl<<alpha*L;
     }
-    double avg = getAvgVel(x);
+    double avg = getAvgVel(x_next);
     cout << avg << endl;
     fprintf(fptr,"%15.6f\n",avg);
 }

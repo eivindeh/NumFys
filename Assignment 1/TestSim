@@ -1,0 +1,5 @@
+%Simple simulation
+X=zeros(1,10000);
+for i = 1:length(X)
+    X(i+1)=X(i)-getU(1,alpha,L,delta_U)*dt;
+end
