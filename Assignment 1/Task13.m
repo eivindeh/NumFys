@@ -10,7 +10,7 @@ t=linspace(0,2,100);
 plot(t,eval(P));
 %ezplot(P);
 hold on
-fileID2 = fopen('velData.txt');
+fileID2 = fopen('velDataLong.txt');
 rawData = textscan(fileID2,'%f');
 vel = rawData{1,1};
 tau = linspace(10,300,290/2);

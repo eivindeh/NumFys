@@ -16,6 +16,7 @@ double alpha     =  0.2;
 double L         =  20;
 double tau       =  400;
 double dt        =  0.001;
+int counter      =  0;
 double r         =  12;
 double eta       =  1;
 const long int N =  800000;
@@ -78,13 +79,13 @@ double step(double x_n,double t_n, double chi)
 }
 
 
-void print2file(double x[][N][M])
+void print2file(double x[][M])
 {
-    FILE *fptr;
-    fptr = fopen("simOut.txt","w");
+    FILE *fptr2;
+    fptr2 = fopen("simOut.txt","w");
     for (int i = 0; i < N; i++)
     {   
-        fprintf(fptr,"%15.6f%15.6f%15.6f\n",x[0][i][0],x[1][i][0],x[2][i][0]);
+        fprintf(fptr,"%15.6f%15.6f\n",x[0][0],x[1][0]);
     }
     fclose(fptr);
 }
@@ -102,18 +103,21 @@ double getAvgVel(double x[][M])
 int main()
 
 {
-//Check timestep
+    FILE *fptr;
+    fptr = fopen("velData.txt","w");
+
+
     cout<<omega<<endl;
     double LHS = dt/alpha+4*sqrt(2*D_hat*dt);
     if (LHS>alpha/10){
         cout<<"Error: Too large timestep"<<endl;
     }
-    //cout<<LHS;
-    //srand (time(NULL));
-    FILE *fptr;
-    fptr = fopen("velData.txt","w");
-    std::default_random_engine generator;
-    std::normal_distribution<double> distribution(0,1);
+
+    srand (time(NULL));
+
+    std::default_random_engine        generator;
+    std::normal_distribution<double>  distribution(0,1);
+
 for (tau=10 ; tau < 300; tau=tau+2){
     for (int j = 0; j < M; j++){
         x_prev[0][j]=0;
@@ -121,16 +125,16 @@ for (tau=10 ; tau < 300; tau=tau+2){
         x_prev[2][j]=0;
 
         for (int i = 0; i < N; i++){
-			chi= distribution(generator);
+	             chi = distribution(generator);
     	    x_next[1][j] = x_prev[1][j] + dt;
     	    x_next[0][j] = step(x_prev[0][j],x_prev[1][j],chi);
     	    x_prev[0][j] = x_next[0][j];
     	    x_prev[1][j] = x_next[1][j];
-    	    //F_r(x[0][i][j],x[1][i][j],&x[2][i][j]);
-    	    //x[2][i+1]=getRandom(0,1);
+            counter++;
         }
-        //print2file(x);
-        //cout<<1/gamma_i*delta_U/(L*alpha)*dt+4*sqrt(2*k_bT*dt/gamma_i)<< endl<<alpha*L;
+        if (counter==100) {
+        print2file(x_prev);
+        }
     }
     double avg = getAvgVel(x_next);
     cout << avg << endl;

@@ -5,24 +5,32 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+#include <random>
 #include "functions.h"
 //#define MAXPNT  1000000
 using namespace std;
 
-double k_bT     =  26;
-double delta_U  =  80000;
-double alpha    =  0.2;
-double L        =  20;
-double tau      =  400;
-double dt       =  0.005;
-double r        =  12;
-double eta      =  1;
-const long int N      =  400000;
-const int M = 100;
-double gamma_i  =  6*3.1415*r*eta;
-double D_hat    =  k_bT/delta_U;
-double omega    =  delta_U/(gamma_i*L*L);
-double x[3][N][M];
+double k_bT      =  26;
+double delta_U   =  80000;
+double alpha     =  0.2;
+double L         =  20;
+double tau       =  70;
+double dt        =  0.001;
+int counter      =  0;
+double r         =  12;
+double eta       =  1;
+const long int N =  800000;
+const int M      =  200;
+
+double gamma_i   =  6*3.1415*r*eta;
+double D_hat     =  k_bT/delta_U;
+double omega     =  delta_U/(gamma_i*L*L);
+
+double x_prev[3][M];
+double x_next[3][M];
+double chi;
+
+
 void U_r(double x_hat,double t_hat,double * U)
 
 {   double x_mod=abs(x_hat-floor(x_hat));
@@ -40,101 +48,107 @@ void F_r(double x_hat,double t_hat,double * F)
 
 {   
     double x_mod=abs(x_hat-floor(x_hat));
-
-    if (x_mod >= 0 && x_mod < alpha)
-        *F = -1/(alpha);
-    else if (x_mod >= alpha && x_mod < 1)
-        *F = 1/(1-alpha);
-    
     double t_mod = abs(t_hat-floor(t_hat/(tau))*tau);
 
     if (t_mod >= 0 && t_mod < 3*tau/4)
         *F = 0;
+
+    else if (x_mod >= 0 && x_mod < alpha)
+        *F = -1/(alpha);
+    else
+        *F = 1/(1-alpha);
+   
 }
 
-double getRandom(double mu, double sigma)
+double  getRandom(std::default_random_engine generator, std::normal_distribution<double> distribution)
 {
-	const double epsilon = std::numeric_limits<double>::min();
-	const double two_pi = 2.0*3.14159265358979323846;
-	static double z0, z1;
-	static bool generate;
-	generate = !generate;
-
-	if (!generate)
-	   return z1 * sigma + mu;
-
-	double u1, u2;
-	do
-	 {
-	   u1 = rand() * (1.0 / RAND_MAX);
-	   u2 = rand() * (1.0 / RAND_MAX);
-	 }
-	while ( u1 <= epsilon );
-
-	z0 = sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
-	z1 = sqrt(-2.0 * log(u1)) * sin(two_pi * u2);
-	return z0 * sigma + mu;
+  double number = distribution(generator);
+  cout<<number;
+  return number;
 }
 
-double step(double x_n,double t_n)
+double step(double x_n,double t_n, double chi)
 {
-    double F;
+    double F=0;
     F_r(x_n,t_n,&F);
 
-    double chi = getRandom(0,1);
+    //double chi = getRandom();
 
-    double x_next = x_n + F*dt + sqrt(2*D_hat*dt)*chi;
+    return  x_n + F*dt + sqrt(2*D_hat*dt)*chi;
     
-    return x_next;
 }
 
 
-void print2file(double x[][N][M])
+void print2file(double x[][M],FILE *fptr2)
 {
-    FILE *fptr;
-    fptr = fopen("simOut.txt","w");
-    for (int i = 0; i < N; i++)
+    for (int j = 0; j < M; j++)
     {   
-        fprintf(fptr,"%15.6f%15.6f%15.6f\n",x[0][i][0],x[1][i][0],x[2][i][0]);
+        fprintf(fptr2,"%15.6f%15.6f\n",x[0][j],x[1][j]);
     }
-    fclose(fptr);
 }
 
-double getAvgVel(double x[][N][M])
+double getAvgVel(double x[][M])
 {
     double avg;
     for( int j = 0; j<M ; j++){
-        avg = avg + x[0][N-1][j];
+        avg = avg + x[0][j];
     }
-    return avg/x[1][N-1][0]/M;
+    return avg/x[1][0]/M;
 }
+
 
 int main()
 
 {
-//Check timestep
-    cout<<omega<<endl;
-    double LHS = dt/alpha+4*sqrt(2*D_hat*dt);
-    if (LHS>alpha/100){
-        cout<<"Error: Too large timestep"<<endl;
-    }
-    //cout<<LHS;
-    srand (time(NULL));
     FILE *fptr;
     fptr = fopen("velData.txt","w");
-    tau = 58.0;
-    for (int j = 0; j < M; j++){
-        x[0][0][j]=0;
-        x[1][0][j]=0;
-        x[2][0][j]=0;
+    
+    FILE *fptr2;
+    fptr2 = fopen("simOut.txt","w");
 
-        for (int i = 0; i < N; i++){
-    	    x[1][i+1][j] = x[1][i][j] + dt;
-    	    x[0][i+1][j] = step(x[0][i][j],x[1][i][j]);
-        }
-        print2file(x[][][j]);
+    cout<<omega<<endl;
+    double LHS = dt/alpha+4*sqrt(2*D_hat*dt);
+    if (LHS>alpha/10){
+        cout<<"Error: Too large timestep"<<endl;
     }
-fclose(fptr);
+
+    srand (time(NULL));
+
+    std::default_random_engine        generator;
+    std::normal_distribution<double>  distribution(0,1);
+
+for (r=12 ; r <= 36; r=r+24){
+    gamma_i   = 6*3.1415*r*eta;
+    tau=12*70/r;
+    for (int j = 0; j < M; j++){
+        x_prev[0][j]=0;
+        x_prev[1][j]=0;
+    }
+
+    for (int i = 0; i < N; i++){
+        
+        for (int j = 0; j < M; j++){
+	             chi = distribution(generator);
+    	    x_next[1][j] = (x_prev[1][j] + dt)*r/12;
+    	    x_next[0][j] = step(x_prev[0][j],x_prev[1][j],chi);
+    	    x_prev[0][j] = x_next[0][j];
+    	    x_prev[1][j] = x_next[1][j];
+        }
+     
+        counter++;
+        if (counter==N/1000) {
+           print2file(x_prev,fptr2);
+           counter = 0;
+        }
+     }
+//    double avg = getAvgVel(x_next);
+    cout << r << endl;
+//    fprintf(fptr,"%15.6f\n",avg);
+
+}
+fclose(fptr2);
     return 0;
 }
+
+
 
