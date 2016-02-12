@@ -1,0 +1,16 @@
+clear all
+q = sym('q','real');
+B = sym('B','real');
+m = sym('m','real');
+t = sym('t','real');
+
+v0_1=sym('v0_1','real');
+v0_1=sym('v0_2','real');
+v0_1=sym('v0_3','real');
+
+A=[zeros(3) eye(3);
+   zeros(3) [0     q*B/m 0;
+             -q*B/m 0     0;
+             0     0     0]];
+v0_2=0;         
+x = expm(A*t)*[0; 0; 0; v0];
