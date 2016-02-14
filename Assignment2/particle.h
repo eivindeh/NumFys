@@ -2,12 +2,13 @@
 class particle {
 	private:
 	double B;
+	double m;
 	double v0_x;
 	double v0_y;
 	double v0_z;
 	double q;
 	double current_state[6];
-	double previos_state[6];
+	double previous_state[6];
 	double t;
 	public:
 	particle();
