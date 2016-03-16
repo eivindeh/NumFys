@@ -16,9 +16,9 @@ int main()
 {
         vec v0 = {1,0,1};
         
-	particle p1(1,v0,2);
+	particle p1(1,v0,3);
 
-	const int N = 3000;
+	const int N = 10000;
 	FILE* fptr;
 	fptr = fopen("EulerOut.txt","w");
 
@@ -31,6 +31,3 @@ int main()
 	
     return 0;
 }
-
-
-

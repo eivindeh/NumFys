@@ -64,7 +64,9 @@ void int_schemes::Mid(particle *p){
 	p->set_time(dt/2);
 }
 
-
+vec int_schemes::midPoint(vec Bint,vec B,double dtheta){
+	return B + Bint*dtheta;
+}
 
 
 

@@ -18,6 +18,7 @@ class particle {
 	particle(double _q, vec v0, int task);
 
 	vec 	RHS();
+	vec     return_integrand(double theta);
 	void 	print_state(FILE* fptr);
 	void 	set_current_state(vec new_current_state);
 	vec 	get_previous_state();
