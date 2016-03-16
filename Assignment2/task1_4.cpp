@@ -1,35 +1,33 @@
 #include <fstream>
 #include <cstdlib>
 #include <cmath>
-#include <limits>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include "particle.h"
 #include "int_schemes.h"
-using namespace std;
+#include <armadillo>
 
+using namespace std;
+using namespace arma;
 
 int main()
 
 {
-	particle p1;
-	particle p2;
-	particle p3;
-	const int N = 100;
+        vec v0 = {1,0,1};
+        
+	particle p1(1,v0,2);
+
+	const int N = 3000;
 	FILE* fptr;
-	
+	fptr = fopen("EulerOut.txt","w");
+
 	int_schemes my_schemes;
 	for(int i = 0; i<N; i++){
-		my_schemes::RK4(p1);
-		my_schemes::Euler(p2);
-		my_schemes::Mid(p3);
-		
-		p1::print_state(fptr);
-		p2::print_state(fptr);
-		p3::print_state(fptr);
+    		my_schemes.RK4(&p1);
+		p1.print_state(fptr);
 	}
-	
+	fclose(fptr);
 	
     return 0;
 }
