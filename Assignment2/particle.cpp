@@ -18,12 +18,13 @@ particle::particle(){
 	t=0;
 }
 
-particle::particle(double _q, vec v0, int _task){ 
+particle::particle(double _q,vec x0, vec v0, int _task){ 
 	q = _q;
 	task = _task;
 	current_state = zeros<vec>(6);
 	previous_state = zeros<vec>(6);
         previous_state(span(3,5))= v0;
+        previous_state(span(0,2))= x0;
         setField();
 	t=0;
 }
@@ -39,7 +40,7 @@ void particle::setField(){
 	
 	//variables used in case 4
 	double theta_max = 2*3.1415;
-	int M = 100;
+	int M = 10;
 	double dtheta = theta_max/M;
 	double theta = 0;
 	int i;
@@ -63,9 +64,9 @@ void particle::setField(){
 		
 		//Set zeros E field and B = B(r) e_theta
 		case 3:
-			x = previous_state(0)+0.000001;
-			y = previous_state(1)+0.000001;
-			B0 = 0.5;
+			x = previous_state(0);
+			y = previous_state(1);
+			B0 = 1;
 			R     = {{x/sqrt(x*x+y*y), -y/sqrt(x*x+y*y), 0},
 				 {y/sqrt(x*x+y*y), x/sqrt(x*x+y*y),  0},
 				 {0		 , 0               , 1}};
@@ -79,10 +80,12 @@ void particle::setField(){
 		//Set helmholtz field 
 		case 4:
 			B = zeros<vec>(3);
-			x = previous_state(0)+0.000001;
-			y = previous_state(1)+0.000001;
+			x = previous_state(0);
+			y = previous_state(1);
+			theta = 0;
 			for (i = 0; i<M; i++){
-				B = my_scheme.midPoint(return_integrand(theta),B,dtheta);
+				//B = my_scheme.midPoint(return_integrand(theta),B,dtheta);
+				B = B + (return_integrand(theta)+4*(return_integrand(theta+dtheta/2))+return_integrand(theta+dtheta))*dtheta/6;
 				theta = theta+dtheta;
 			}
 			
@@ -128,14 +131,14 @@ void particle::set_time(double dt){
 vec particle::return_integrand(double theta){
 	//only in use in case 4
 	double r 	= norm(previous_state(span(0,1)),2);
-	double R	= 1;
+	double R	= 0.2;
 	double z 	= previous_state(2);
 	
 	vec B_int = zeros<vec>(3);
 	
-	B_int(0) = pow(1/(R*R),3/2)/(4*3.1415*R)*((z-1)*cos(theta)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z-1),2)),(3/2)) + (z+1)*cos(theta)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z+1),2)),(3/2))); 
+	B_int(0) = pow(1+(R*R),3.0/2.0)/(4*3.1415*R)*((z-1)*cos(theta)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z-1),2)),(3.0/2.0)) + (z+1)*cos(theta)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z+1),2)),(3.0/2.0))); 
 	
-	B_int(2) = pow(1/(R*R),3/2)/(4*3.1415*R)*((1-cos(theta)*r/R)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z-1),2)),(3/2)) + (1-cos(theta)*r/R)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z+1),2)),(3/2)));
+	B_int(2) = pow(1+(R*R),3.0/2.0)/(4*3.1415)*((1-cos(theta)*r/R)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z-1),2)),(3.0/2.0)) + (1-cos(theta)*r/R)/pow((pow((r-R*cos(theta)),2)+pow(R*sin(theta),2)+pow((z+1),2)),(3.0/2.0)));
 	
 	return B_int;
 }

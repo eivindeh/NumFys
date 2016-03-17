@@ -14,11 +14,12 @@ using namespace arma;
 int main()
 
 {
-        vec v0 = {1,0,1};
+	vec x0 = {0,0.4,0};
+        vec v0 = {0.02,0,0.02};
         
-	particle p1(1,v0,3);
+	particle p1(1,x0,v0,4);
 
-	const int N = 10000;
+	const int N = 100000;
 	FILE* fptr;
 	fptr = fopen("EulerOut.txt","w");
 

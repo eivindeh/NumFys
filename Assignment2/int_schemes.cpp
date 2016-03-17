@@ -7,7 +7,7 @@ using namespace std;
 using namespace arma;
 
 int_schemes::int_schemes(){
-	dt = 0.01;
+	dt = 0.001;
 }
 void int_schemes::Euler(particle *p){
 	vec x_p    = p->get_previous_state();

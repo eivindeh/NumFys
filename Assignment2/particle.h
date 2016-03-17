@@ -15,7 +15,7 @@ class particle {
 	vec 	previous_state;
 	public:
 	particle();
-	particle(double _q, vec v0, int task);
+	particle(double _q,vec x0, vec v0, int task);
 
 	vec 	RHS();
 	vec     return_integrand(double theta);
