@@ -21,7 +21,17 @@ int main()
         vec v0 = {1,0,1};
         v0 = v0*0.1/sqrt(2);
         
-	particle p1(-1,x0,v0,6);
+        int task = 5;
+        // Task number specifies which task to perform
+	// Task 1 = constant B ans E
+	// Task 2 = zero E and B(y)
+	// Task 3 = zero E and B(r)
+	// Task 4 = Magnetic bottle
+	// Task 5 = Earth field
+	// Task 6 = Earth field whith guiding center approximation
+	  
+        
+	particle p1(-1,x0,v0,task);
 	const int N = 3000000;
 	FILE* fptr;
 	fptr = fopen("EulerOut.txt","w");

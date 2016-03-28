@@ -11,6 +11,8 @@ using namespace std;
 using namespace arma;
 
 mat getTransMat(particle p){
+	//function returning the transformation matrix from curret to cartesian coordinate system
+	//for task 3 and 4 this is the transfomration from cyindrical to cartesian while 5 and 6 is from spherical
 	double x,y,z,sf,cf,st,ct,r;
 	mat R;
 	vec X = p.get_previous_state();
@@ -143,6 +145,7 @@ vec particle::RHS(){
 	double v_par,v_nor,r,v2,B_abs,alpha,theta,r3;
 	mat R;
 	vec b,gradB;
+	alpha=62.56;
         if(task==6){
         //using guiding center approximation
 		v_par = previous_state(3);
@@ -169,10 +172,15 @@ vec particle::RHS(){
         	}
 		v2 = v_par*v_par+mu*B_abs;
 		//alpha=1;
-		alpha=62.56;
 		F(span(0,2))= R*(v2/(2*alpha*B_abs*B_abs)*(1+v_par*v_par/v2)*(cross(b,gradB))+v_par*b);
 		F(3) = -1.0/2.0*(dot(R*b,R*gradB))*mu;
 		//cout<<F(3)<<endl;
+	}
+	
+	else if(task==5) {
+		setField();
+		F(span(0,2))=previous_state(span(3,5));
+		F(span(3,5))=(E+cross(previous_state(span(3,5)),B))*alpha;
 	}
 	
 	else{
