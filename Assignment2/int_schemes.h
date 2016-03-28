@@ -13,5 +13,5 @@ class int_schemes {
 	void RK4(particle *p);
 	void Euler(particle *p);
 	void Mid(particle *p);
-	vec  midPoint(vec Bint,vec B,double dtheta);
+	vec  simpsons(particle*p, double theta, double dtheta);
 };

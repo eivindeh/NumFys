@@ -7,7 +7,8 @@ using namespace std;
 using namespace arma;
 
 int_schemes::int_schemes(){
-	dt = 0.001;
+	//dt = 0.0005;
+	dt = 0.01;
 }
 void int_schemes::Euler(particle *p){
 	vec x_p    = p->get_previous_state();
@@ -44,6 +45,7 @@ void int_schemes::RK4(particle *p) {
 	k4     = dt*F;
 	
 	value = x_n + k1/6 + k2/3 + k3/3 + k4/6;
+	//cout<<x_n<<endl;
 	p->set_current_state(value);
 	
 }
@@ -64,8 +66,13 @@ void int_schemes::Mid(particle *p){
 	p->set_time(dt/2);
 }
 
-vec int_schemes::midPoint(vec Bint,vec B,double dtheta){
-	return B + Bint*dtheta;
+vec int_schemes::simpsons(particle *p, double theta, double dtheta){
+        vec f1, f2, f3;
+        f1 = p->return_integrand(theta);
+        f2 = p->return_integrand(theta+dtheta/2);
+        f3 = p->return_integrand(theta+dtheta);
+
+	return (f1+4*f2+f3)*dtheta/6;
 }
 
 
